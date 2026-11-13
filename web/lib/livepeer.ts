@@ -1,18 +1,29 @@
-import { Livepeer } from "livepeer"
 
-const LIVEPEER_API_KEY = process.env.LIVEPEER_API_KEY
+import "server-only";
+import { Livepeer } from "livepeer";
 
-if (!LIVEPEER_API_KEY) {
-  throw new Error(
-    "LIVEPEER_API_KEY is not defined. Add it to .env.local"
-  )
+// Lazily initialize the Livepeer client.
+// Prevents environment-variable errors during
+// Next.js build-time module evaluation.
+
+let livepeerClient: Livepeer | null = null;
+
+export function getLivepeerClient(): Livepeer {
+  const apiKey = process.env.LIVEPEER_API_KEY;
+
+  if (!apiKey || !apiKey.trim()) {
+    throw new Error(
+      "LIVEPEER_API_KEY is missing. Configure it in Vercel Environment Variables."
+    );
+  }
+
+  if (!livepeerClient) {
+    livepeerClient = new Livepeer({
+      apiKey: apiKey.trim(),
+    });
+  }
+
+  return livepeerClient;
 }
 
-// Server-side only Livepeer client
-// Import this ONLY in API routes and server components
-// Never import in client components (exposes API key)
-const livepeer = new Livepeer({
-  apiKey: LIVEPEER_API_KEY,
-})
-
-export default livepeer
+export default getLivepeerClient;
