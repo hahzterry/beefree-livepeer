@@ -56,8 +56,10 @@ export async function GET(
     );
 
     // 4. Fetch playback information
-    const info = await livepeer.playback.get(
-      playbackId.trim()
+    const client = livepeer();
+
+  const info = await client.playback.get(
+  playbackId.trim()
     );
 
     // 5. Validate Livepeer response
