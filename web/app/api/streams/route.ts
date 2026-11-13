@@ -3,7 +3,7 @@ import { PrivyClient } from "@privy-io/server-auth";
 import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
 import Stream from "@/models/Stream";
-import livepeer from "@/lib/livepeer";
+import { getLivepeerClient } from "@/lib/livepeer";
 import { ApiResponse } from "@/types";
 
 const privy = new PrivyClient(
@@ -43,7 +43,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Create stream on Livepeer
-    const response = await livepeer.stream.create({
+    // getLivepeerClient() lazily instantiates the Livepeer SDK client
+    // and validates that LIVEPEER_API_KEY is present at runtime.
+    const livepeerClient = getLivepeerClient();
+
+    const response = await livepeerClient.stream.create({
       name: title,
       record: true, // record stream for replay
     });
